@@ -1,0 +1,14 @@
+#! /bin/sh
+
+if [ -d /usr/systemd/system/dht11rs.service ]; then
+    sudo systemctl stop dht11rs.service;
+fi
+
+if [ -d /usr/share/dht11res/dht11res ]; then
+    cd /usr/share/dht11res/dht11res;
+    git pull;
+    cargo build --release;
+    sudo cp -pvr ./target/release/dht11res /usr/bin/dht11res;
+    sudo systemctl daemon-reload;
+    sudo systemctl start dht11rs.service;
+fi

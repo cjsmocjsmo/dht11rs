@@ -1,0 +1,10 @@
+[Unit]
+Description=Rust DHT Sensor Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/dht11rs
+Environment=RUST_LOG=info
+
+[Install]
+WantedBy=multi-user.target
