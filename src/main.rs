@@ -22,7 +22,7 @@ use chrono::Local;
 
 fn main() -> Result<()> {
     // Initialize the SQLite database
-    let path = Path::new("/usr/share/dht11rs/sensor_data.db");
+    let path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
     let conn = Connection::open(&path)?;
 
     // Create the table if it doesn't exist
@@ -65,6 +65,7 @@ fn main() -> Result<()> {
         println!("Temperature (F): {}", tempf);
         println!("Humidity: {:.2}%", humi);
         println!("Timestamp: {}", timestamp);
+        println!("Idx: {}", idx);
 
         std::thread::sleep(std::time::Duration::from_secs(60));
         }
