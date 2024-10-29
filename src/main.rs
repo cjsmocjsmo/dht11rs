@@ -19,6 +19,7 @@ use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
 use chrono::Local;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 fn main() -> Result<()> {
     // Initialize the SQLite database
@@ -45,9 +46,9 @@ fn main() -> Result<()> {
     // the read succeeds.
     // For more information, see documentation on `read()`
     let foo = true;
-    let mut idx = 0;
     while foo {
-        idx = idx + 1;
+        let start = SystemTime::now();
+        let idx = start.duration_since(UNIX_EPOCH).unwrap().as_secs();
         let reading = dht.read().unwrap();
 
         let temp = reading.temperature();
@@ -62,13 +63,13 @@ fn main() -> Result<()> {
             params![idx, tempc, tempf, humi, timestamp],
         )?;
 
-        println!("Temperature (C): {}", tempc);
-        println!("Temperature (F): {}", tempf);
-        println!("Humidity: {:.2}%", humi);
-        println!("Timestamp: {}", timestamp);
-        println!("Idx: {}", idx);
+        // println!("Temperature (C): {}", tempc);
+        // println!("Temperature (F): {}", tempf);
+        // println!("Humidity: {:.2}%", humi);
+        // println!("Timestamp: {}", timestamp);
+        // println!("Idx: {}", idx);
 
-        std::thread::sleep(std::time::Duration::from_secs(60));
+        std::thread::sleep(std::time::Duration::from_secs(300));
         }
 
     Ok(())
