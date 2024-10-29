@@ -29,6 +29,7 @@ fn main() -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensor (
             id INTEGER PRIMARY KEY,
+            idx INTEGER NOT NULL,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
             humi REAL NOT NULL,
