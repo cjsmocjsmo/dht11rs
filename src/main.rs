@@ -63,13 +63,13 @@ fn main() -> Result<()> {
             params![idx, tempc, tempf, humi, timestamp],
         )?;
 
-        // println!("Temperature (C): {}", tempc);
-        // println!("Temperature (F): {}", tempf);
-        // println!("Humidity: {:.2}%", humi);
-        // println!("Timestamp: {}", timestamp);
-        // println!("Idx: {}", idx);
+        println!("Temperature (C): {}", tempc);
+        println!("Temperature (F): {}", tempf);
+        println!("Humidity: {:.2}%", humi);
+        println!("Timestamp: {}", timestamp);
+        println!("Idx: {}", idx);
 
-        std::thread::sleep(std::time::Duration::from_secs(300));
+        std::thread::sleep(std::time::Duration::from_secs(60));
         }
 
     Ok(())
