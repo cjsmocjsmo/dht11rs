@@ -33,7 +33,7 @@ fn main() -> Result<()> {
             tempf TEXT NOT NULL,
             humi REAL NOT NULL,
             date TEXT NOT NULL,
-            time TEXT NOT NULL,
+            time TEXT NOT NULL
         )",
         [],
     )?;
