@@ -19,7 +19,6 @@ use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
 use chrono::Local;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 fn main() -> Result<()> {
     // Initialize the SQLite database
@@ -30,11 +29,11 @@ fn main() -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensor (
             id INTEGER PRIMARY KEY,
-            idx INTEGER NOT NULL,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
             humi REAL NOT NULL,
-            timestamp TEXT NOT NULL
+            date TEXT NOT NULL,
+            time TEXT NOT NULL,
         )",
         [],
     )?;
@@ -47,8 +46,6 @@ fn main() -> Result<()> {
     // For more information, see documentation on `read()`
     let foo = true;
     while foo {
-        let start = SystemTime::now();
-        let idx = start.duration_since(UNIX_EPOCH).unwrap().as_secs();
         let reading = dht.read().unwrap();
 
         let temp = reading.temperature();
@@ -56,11 +53,13 @@ fn main() -> Result<()> {
         let tempff = temp * 9.0 / 5.0 + 32.0;
         let tempf = format!("{:.2}", tempff);
         let humi = reading.humidity();
-        let timestamp = Local::now().format("%Y-%m-%d-%H:%M").to_string();
+        let date = Local::now().format("%Y-%m-%d").to_string();
+        let time = Local::now().format("%H:%M").to_string();
+        
         // Insert the data into the database
         conn.execute(
-            "INSERT INTO sensor (idx, tempc, tempf, humi, timestamp) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![idx, tempc, tempf, humi, timestamp],
+            "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![tempc, tempf, humi, date, time],
         )?;
 
         // println!("Temperature (C): {}", tempc);
