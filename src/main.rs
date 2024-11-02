@@ -31,7 +31,7 @@ fn main() -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
-            humi REAL NOT NULL,
+            humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL
         )",
@@ -52,7 +52,8 @@ fn main() -> Result<()> {
         let tempc = format!("{:.2}", temp);
         let tempff = temp * 9.0 / 5.0 + 32.0;
         let tempf = format!("{:.2}", tempff);
-        let humi = reading.humidity();
+        let hum = reading.humidity();
+        let humi = format!("{:.2}", hum);
         let date = Local::now().format("%Y-%m-%d").to_string();
         let time = Local::now().format("%H:%M").to_string();
         
