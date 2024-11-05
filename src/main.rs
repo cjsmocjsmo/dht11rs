@@ -18,6 +18,7 @@
 use chrono::{Datelike, Local, Timelike, TimeZone};
 use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
+// use std::f32::MIN;
 use std::fs;
 use std::path::Path;
 // use std::time::{SystemTime, UNIX_EPOCH};
@@ -31,8 +32,8 @@ struct SensorData {
     time: String,
 }
 
-fn read_data(d: String, t: String) -> SensorData {
-    let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
+fn read_data(mut dht: Dht, d: String, t: String) -> SensorData {
+    // let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
     let reading = dht.read().unwrap();
     let temp = reading.temperature();
     let tempc = format!("{:.2}", temp);
@@ -58,6 +59,11 @@ fn main() -> Result<()> {
     let year = now.year();
     let month = now.month();
     let day = now.day();
+    let date = now.format("%Y-%m-%d").to_string();
+    let time = now.format("%H:%M").to_string();
+    let minute = now.minute();
+
+    let dhtt = Dht::new(DhtType::Dht11, 2).unwrap();
 
     // Define the paths
     let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
@@ -113,25 +119,29 @@ fn main() -> Result<()> {
         [],
     )?;
     
-    let date = Local::now().format("%Y-%m-%d").to_string();
-    let time = Local::now().format("%H:%M").to_string();
-    let minute = Local::now().minute();
+    // let date = Local::now().format("%Y-%m-%d").to_string();
+    // let time = Local::now().format("%H:%M").to_string();
+    // let minute = Local::now().minute();
 
     if minute == 0 {
-        let data = read_data(date, time);
+        let mut datavec:Vec<SensorData> = vec![];
+        let data = read_data(dhtt, date, time);
+        datavec.push(data);
         conn.execute(
             "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![data.tempc, data.tempf, data.humi, data.date, data.time],
+            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
         )?;
         conn.execute(
             "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![data.tempc, data.tempf, data.humi, data.date, data.time],
+            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
         )?;
     } else if minute == 15 || minute == 30 || minute == 45 {
-        let data = read_data(date, time);
+        let mut datavec:Vec<SensorData> = vec![];
+        let data = read_data(dhtt, date, time);
+        datavec.push(data);
         conn.execute(
             "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![data.tempc, data.tempf, data.humi, data.date, data.time],
+            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
         )?;
     }
 
