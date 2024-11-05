@@ -62,6 +62,7 @@ fn main() -> Result<()> {
     let date = now.format("%Y-%m-%d").to_string();
     let time = now.format("%H:%M").to_string();
     let minute = now.minute();
+    println!("minute {}", minute);
 
     let mut dhtt = Dht::new(DhtType::Dht11, 2).unwrap();
 
