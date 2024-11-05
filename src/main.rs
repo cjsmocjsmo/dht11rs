@@ -32,7 +32,7 @@ struct SensorData {
     time: String,
 }
 
-fn read_data(mut dht: Dht, d: String, t: String) -> SensorData {
+fn read_data(dht: &mut Dht, d: String, t: String) -> SensorData {
     // let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
     let reading = dht.read().unwrap();
     let temp = reading.temperature();
@@ -63,7 +63,7 @@ fn main() -> Result<()> {
     let time = now.format("%H:%M").to_string();
     let minute = now.minute();
 
-    let dhtt = Dht::new(DhtType::Dht11, 2).unwrap();
+    let mut dhtt = Dht::new(DhtType::Dht11, 2).unwrap();
 
     // Define the paths
     let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
@@ -122,27 +122,29 @@ fn main() -> Result<()> {
     // let date = Local::now().format("%Y-%m-%d").to_string();
     // let time = Local::now().format("%H:%M").to_string();
     // let minute = Local::now().minute();
-
-    if minute == 0 {
-        let mut datavec:Vec<SensorData> = vec![];
-        let data = read_data(dhtt, date, time);
-        datavec.push(data);
-        conn.execute(
-            "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
-        )?;
-        conn.execute(
-            "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
-        )?;
-    } else if minute == 15 || minute == 30 || minute == 45 {
-        let mut datavec:Vec<SensorData> = vec![];
-        let data = read_data(dhtt, date, time);
-        datavec.push(data);
-        conn.execute(
-            "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
-        )?;
+    let foo = true;
+    while foo {
+        if minute == 0 {
+            let mut datavec:Vec<SensorData> = vec![];
+            let data = read_data(&mut dhtt, date.clone(), time.clone());
+            datavec.push(data);
+            conn.execute(
+                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+            )?;
+            conn.execute(
+                "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+            )?;
+        } else if minute == 15 || minute == 30 || minute == 45 {
+            let mut datavec:Vec<SensorData> = vec![];
+            let data = read_data(&mut dhtt, date.clone(), time.clone());
+            datavec.push(data);
+            conn.execute(
+                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+            )?;
+        }
     }
 
     Ok(())
