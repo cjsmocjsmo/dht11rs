@@ -22,6 +22,36 @@ use std::fs;
 use std::path::Path;
 // use std::time::{SystemTime, UNIX_EPOCH};
 
+#[derive(Debug)]
+struct SensorData {
+    tempc: String,
+    tempf: String,
+    humi: String,
+    date: String,
+    time: String,
+}
+
+fn read_data(d: String, t: String) -> SensorData {
+    let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
+    let reading = dht.read().unwrap();
+    let temp = reading.temperature();
+    let tempc = format!("{:.2}", temp);
+    let tempff = temp * 9.0 / 5.0 + 32.0;
+    let tempf = format!("{:.2}", tempff);
+    let hum = reading.humidity();
+    let humi = format!("{:.2}", hum);
+    let date = d;
+    let time = t;
+
+    SensorData {
+        tempc,
+        tempf,
+        humi,
+        date,
+        time,
+    }
+}
+
 fn main() -> Result<()> {
     // Get the current date
     let now = Local::now();
@@ -82,63 +112,27 @@ fn main() -> Result<()> {
         )",
         [],
     )?;
+    
+    let date = Local::now().format("%Y-%m-%d").to_string();
+    let time = Local::now().format("%H:%M").to_string();
+    let minute = Local::now().minute();
 
-    // The sensor is a DHT11 connected on pin 23
-    let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
-
-    // Important: DHT sensor reads fail sometimes. In an actual program, if a read fails you should retry multiple times until
-    // the read succeeds.
-    // For more information, see documentation on `read()`
-    let foo = true;
-    while foo {
-        // let start = SystemTime::now();
-        // let idx = start.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        let reading = dht.read().unwrap();
-
-        let temp = reading.temperature();
-        let tempc = format!("{:.2}", temp);
-        let tempff = temp * 9.0 / 5.0 + 32.0;
-        let tempf = format!("{:.2}", tempff);
-        let hum = reading.humidity();
-        let humi = format!("{:.2}", hum);
-        let date = Local::now().format("%Y-%m-%d").to_string();
-        let time = Local::now().format("%H:%M").to_string();
-        let minute = Local::now().minute();
-
-        // Insert the data into the sensor table
+    if minute == 0 {
+        let data = read_data(date, time);
         conn.execute(
             "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![tempc, tempf, humi, date, time],
+            params![data.tempc, data.tempf, data.humi, data.date, data.time],
         )?;
-
-        // If it's the top of the hour, insert the data into the sensorhour table
-        if minute == 0 {
-            conn.execute(
-                "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![tempc, tempf, humi, date, time],
-            )?;
-            conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![tempc, tempf, humi, date, time],
-            )?;
-        } else if minute == 15 {
-            conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![tempc, tempf, humi, date, time],
-            )?;
-        } else if minute == 30 {
-            conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![tempc, tempf, humi, date, time],
-            )?;
-        } else if minute == 45 {
-            conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![tempc, tempf, humi, date, time],
-            )?;
-        }
-
-        // std::thread::sleep(std::time::Duration::from_secs(300));
+        conn.execute(
+            "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![data.tempc, data.tempf, data.humi, data.date, data.time],
+        )?;
+    } else if minute == 15 || minute == 30 || minute == 45 {
+        let data = read_data(date, time);
+        conn.execute(
+            "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![data.tempc, data.tempf, data.humi, data.date, data.time],
+        )?;
     }
 
     Ok(())
