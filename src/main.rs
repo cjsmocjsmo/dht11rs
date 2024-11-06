@@ -18,10 +18,8 @@
 use chrono::{Datelike, Local, Timelike, TimeZone};
 use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
-// use std::f32::MIN;
 use std::fs;
 use std::path::Path;
-// use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug)]
 struct SensorData {
@@ -30,9 +28,10 @@ struct SensorData {
     humi: String,
     date: String,
     time: String,
+    timestamp: String,
 }
 
-fn read_data(d: String, t: String) -> SensorData {
+fn read_data(d: String, t: String, ts: String) -> SensorData {
     let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
     let reading = dht.read().unwrap();
     let temp = reading.temperature();
@@ -43,6 +42,7 @@ fn read_data(d: String, t: String) -> SensorData {
     let humi = format!("{:.2}", hum);
     let date = d;
     let time = t;
+    let timestamp = ts;
 
     SensorData {
         tempc,
@@ -50,6 +50,7 @@ fn read_data(d: String, t: String) -> SensorData {
         humi,
         date,
         time,
+        timestamp,
     }
 }
 
@@ -61,7 +62,8 @@ fn create_tables(conn: &Connection) -> Result<()> {
             tempf TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
-            time TEXT NOT NULL UNIQUE
+            time TEXT NOT NULL,
+            timestamp TEXT NOT NULL UNIQUE
         )",
         [],
     )?;
@@ -73,7 +75,8 @@ fn create_tables(conn: &Connection) -> Result<()> {
             tempf TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
-            time TEXT NOT NULL UNIQUE
+            time TEXT NOT NULL,
+            timestamp TEXT NOT NULL UNIQUE
         )",
         [],
     )?;
@@ -116,6 +119,7 @@ fn main() -> Result<()> {
         let day = now.day();
         let date = now.format("%Y-%m-%d").to_string();
         let time = now.format("%H:%M").to_string();
+        let timestamp = now.format("%Y-%m-%d-%H:%M:%S").to_string();
         let minute = now.minute();
         println!("minute {}", minute);
 
@@ -132,23 +136,23 @@ fn main() -> Result<()> {
     
         if minute == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone());
+            let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
             conn.execute(
-                "INSERT INTO sensorhour (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+                "INSERT INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
         } else if minute == 15 || minute == 30 || minute == 45 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone());
+            let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
         }
     }
