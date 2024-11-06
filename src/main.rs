@@ -32,8 +32,8 @@ struct SensorData {
     time: String,
 }
 
-fn read_data(dht: &mut Dht, d: String, t: String) -> SensorData {
-    // let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
+fn read_data(d: String, t: String) -> SensorData {
+    let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
     let reading = dht.read().unwrap();
     let temp = reading.temperature();
     let tempc = format!("{:.2}", temp);
@@ -53,49 +53,7 @@ fn read_data(dht: &mut Dht, d: String, t: String) -> SensorData {
     }
 }
 
-fn main() -> Result<()> {
-    // Get the current date
-    let now = Local::now();
-    let year = now.year();
-    let month = now.month();
-    let day = now.day();
-    let date = now.format("%Y-%m-%d").to_string();
-    let time = now.format("%H:%M").to_string();
-    let minute = now.minute();
-    println!("minute {}", minute);
-
-    let mut dhtt = Dht::new(DhtType::Dht11, 2).unwrap();
-
-    // Define the paths
-    let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
-    let db_dir = Path::new("/usr/share/dht11rs/db/");
-
-    // Check if it's the first of the month
-    if day == 1 {
-        // Create the db directory if it doesn't exist
-        if !db_dir.exists() {
-            fs::create_dir_all(db_dir).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
-        }
-
-        // Format the new file name
-        let previous_month = if month == 1 {
-            Local.with_ymd_and_hms(year - 1, 12, 1, 0, 0, 0).unwrap()
-        } else {
-            Local.with_ymd_and_hms(year, month - 1, 1, 0, 0, 0).unwrap()
-        };
-        let new_file_name = format!("{}{}.db", previous_month.format("%B"), previous_month.year());
-        let new_file_path = db_dir.join(new_file_name);
-
-        // Rename the old database file
-        if db_path.exists() {
-            fs::rename(db_path, new_file_path).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
-        }
-    }
-
-    // Initialize the SQLite database
-    let conn = Connection::open(&db_path)?;
-
-    // Create the tables if they don't exist
+fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensor (
             id INTEGER PRIMARY KEY,
@@ -103,7 +61,7 @@ fn main() -> Result<()> {
             tempf TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
-            time TEXT NOT NULL
+            time TEXT NOT NULL UNIQUE
         )",
         [],
     )?;
@@ -115,19 +73,66 @@ fn main() -> Result<()> {
             tempf TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
-            time TEXT NOT NULL
+            time TEXT NOT NULL UNIQUE
         )",
         [],
     )?;
-    
-    // let date = Local::now().format("%Y-%m-%d").to_string();
-    // let time = Local::now().format("%H:%M").to_string();
-    // let minute = Local::now().minute();
+
+    Ok(())
+}
+
+fn rotate_db_file(year: u32, month: u32, day: u32, db_path: String, db_dir: String) -> Result<(), rusqlite::Error> {
+   
+    // Check if it's the first of the month
+    if day == 1 {
+        // Create the db directory if it doesn't exist
+        if !Path::new(&db_dir).exists() {
+            fs::create_dir_all(db_dir.clone()).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+        }
+
+        // Format the new file name
+        let previous_month = if month == 1 {
+            Local.with_ymd_and_hms((year - 1) as i32, 12, 1, 0, 0, 0).unwrap()
+        } else {
+            Local.with_ymd_and_hms(year as i32, (month - 1) as u32, 1, 0, 0, 0).unwrap()
+        };
+        let new_file_name = format!("{}{}.db", previous_month.format("%B"), previous_month.year());
+        let new_file_path = Path::new(&db_dir).join(new_file_name);
+
+        // Rename the old database file
+        if Path::new(&db_dir).exists() {
+            fs::rename(db_path, new_file_path).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+        }
+    }
+    Ok(())
+}
+
+fn main() -> Result<()> {
     let foo = true;
     while foo {
+        let now = Local::now();
+        let year = now.year() as u32;
+        let month = now.month();
+        let day = now.day();
+        let date = now.format("%Y-%m-%d").to_string();
+        let time = now.format("%H:%M").to_string();
+        let minute = now.minute();
+        println!("minute {}", minute);
+
+
+        let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
+        let db_dir = Path::new("/usr/share/dht11rs/db/").to_path_buf();
+
+        let _ = rotate_db_file(year, month, day, db_path.to_str().unwrap().to_string(), db_dir.to_str().unwrap().to_string())?;
+
+        let conn = Connection::open(&db_path)?;
+        let _ = create_tables(&conn)?;
+
+    
+    
         if minute == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(&mut dhtt, date.clone(), time.clone());
+            let data = read_data(date.clone(), time.clone());
             datavec.push(data);
             conn.execute(
                 "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -139,7 +144,7 @@ fn main() -> Result<()> {
             )?;
         } else if minute == 15 || minute == 30 || minute == 45 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(&mut dhtt, date.clone(), time.clone());
+            let data = read_data(date.clone(), time.clone());
             datavec.push(data);
             conn.execute(
                 "INSERT INTO sensor (tempc, tempf, humi, date, time) VALUES (?1, ?2, ?3, ?4, ?5)",
