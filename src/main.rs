@@ -121,6 +121,7 @@ fn main() -> Result<()> {
         let time = now.format("%H:%M").to_string();
         let timestamp = now.format("%Y-%m-%d-%H:%M:%S").to_string();
         let minute = now.minute();
+        let second = now.second();
         println!("minute {}", minute);
 
 
@@ -134,7 +135,7 @@ fn main() -> Result<()> {
 
     
     
-        if minute == 0 {
+        if minute == 0 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
@@ -146,7 +147,7 @@ fn main() -> Result<()> {
                 "INSERT INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
-        } else if minute == 15 || minute == 30 || minute == 45 {
+        } else if minute == 15 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
@@ -154,6 +155,23 @@ fn main() -> Result<()> {
                 "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
+        } else if minute == 30 && second == 0 {
+            let mut datavec:Vec<SensorData> = vec![];
+            let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            datavec.push(data);
+            conn.execute(
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            )?;
+        } else if minute == 45 && second == 0 {
+            let mut datavec:Vec<SensorData> = vec![];
+            let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            datavec.push(data);
+            conn.execute(
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            )?;
+            
         }
     }
 
