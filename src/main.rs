@@ -126,8 +126,6 @@ fn main() -> Result<()> {
         let timestamp = now.format("%Y-%m-%d-%H:%M:%S").to_string();
         let minute = now.minute();
         let second = now.second();
-        println!("minute {}", minute);
-
 
         let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
         let db_dir = Path::new("/usr/share/dht11rs/db/").to_path_buf();
