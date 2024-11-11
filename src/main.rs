@@ -36,13 +36,13 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
     let reading = dht.read().unwrap();
 
     let temp = reading.temperature();
-    let tempc = format!("{:.2}", temp);
+    let tempc = format!("{:.1}", temp);
 
     let tempff = temp * 9.0 / 5.0 + 32.0;
-    let tempf = format!("{:.2}", tempff);
+    let tempf = format!("{:.1}", tempff);
 
     let hu = reading.humidity();
-    let humi = format!("{:.2}", hu);
+    let humi = format!("{:.1}", hu);
 
     let date = d;
     let time = t;
