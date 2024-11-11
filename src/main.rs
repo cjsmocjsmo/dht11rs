@@ -63,9 +63,9 @@ fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensor (
             id INTEGER PRIMARY KEY,
-            tempc INTEGER NOT NULL,
-            tempf INTEGER NOT NULL,
-            humi INTEGER NOT NULL,
+            tempc REAL NOT NULL,
+            tempf REAL NOT NULL,
+            humi REAL NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
             timestamp TEXT NOT NULL UNIQUE
@@ -76,9 +76,9 @@ fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensorhour (
             id INTEGER PRIMARY KEY,
-            tempc INTEGER NOT NULL,
-            tempf INTEGER NOT NULL,
-            humi INTEGER NOT NULL,
+            tempc REAL NOT NULL,
+            tempf REAL NOT NULL,
+            humi REAL NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
             timestamp TEXT NOT NULL UNIQUE
