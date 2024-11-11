@@ -23,9 +23,9 @@ use std::path::Path;
 
 #[derive(Debug)]
 struct SensorData {
-    tempc: String,
-    tempf: String,
-    humi: String,
+    tempc: f32,
+    tempf: f32,
+    humi: f32,
     date: String,
     time: String,
     timestamp: String,
@@ -35,11 +35,16 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
     let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
     let reading = dht.read().unwrap();
     let temp = reading.temperature();
-    let tempc = format!("{:.2}", temp);
-    let tempff = temp * 9.0 / 5.0 + 32.0;
-    let tempf = format!("{:.2}", tempff);
-    let hum = reading.humidity();
-    let humi = format!("{:.2}", hum);
+    let tempcc = format!("{:.2}", temp);
+    let tempc = tempcc.parse::<f32>().unwrap();
+
+    let tempfff = temp * 9.0 / 5.0 + 32.0;
+    let tempff = format!("{:.2}", tempfff);
+    let tempf = tempff.parse::<f32>().unwrap();
+
+    let hu = reading.humidity();
+    let hum = format!("{:.2}", hu);
+    let humi = hum.parse::<f32>().unwrap();
     let date = d;
     let time = t;
     let timestamp = ts;
@@ -58,9 +63,9 @@ fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensor (
             id INTEGER PRIMARY KEY,
-            tempc TEXT NOT NULL,
-            tempf TEXT NOT NULL,
-            humi TEXT NOT NULL,
+            tempc INTEGER NOT NULL,
+            tempf INTEGER NOT NULL,
+            humi INTEGER NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
             timestamp TEXT NOT NULL UNIQUE
@@ -71,9 +76,9 @@ fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sensorhour (
             id INTEGER PRIMARY KEY,
-            tempc TEXT NOT NULL,
-            tempf TEXT NOT NULL,
-            humi TEXT NOT NULL,
+            tempc INTEGER NOT NULL,
+            tempf INTEGER NOT NULL,
+            humi INTEGER NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
             timestamp TEXT NOT NULL UNIQUE
