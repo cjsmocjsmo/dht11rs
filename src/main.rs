@@ -168,11 +168,11 @@ fn main() -> Result<()> {
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
             conn.execute(
-                "INSERT INTO sensorhour (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 15 && second == 0 {
@@ -180,7 +180,7 @@ fn main() -> Result<()> {
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 30 && second == 0 {
@@ -188,7 +188,7 @@ fn main() -> Result<()> {
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 45 && second == 0 {
@@ -196,7 +196,7 @@ fn main() -> Result<()> {
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
             
