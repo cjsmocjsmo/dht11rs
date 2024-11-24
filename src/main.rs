@@ -20,6 +20,7 @@ use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 #[derive(Debug)]
 struct SensorData {
@@ -29,6 +30,22 @@ struct SensorData {
     date: String,
     time: String,
     timestamp: String,
+    cputemp: String,
+}
+
+fn read_cpu_temp() -> String {
+    let output = Command::new("vcgencmd")
+        .arg("measure_temp")
+        .output()
+        .expect("Failed to execute command");
+
+    let temp = String::from_utf8(output.stdout).unwrap();
+    let temp = temp.replace("temp=", "").replace("'C\n", "");
+    let temp = temp.parse::<f32>().unwrap();
+    // let temp = temp * 9.0 / 5.0 + 32.0;
+    let temp = format!("{:.1}", temp);
+
+    temp
 }
 
 fn read_data(d: String, t: String, ts: String) -> SensorData {
@@ -48,6 +65,8 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
     let time = t;
     let timestamp = ts;
 
+    let cputemp = read_cpu_temp();
+
     SensorData {
         tempc,
         tempf,
@@ -55,6 +74,7 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
         date,
         time,
         timestamp,
+        cputemp,
     }
 }
 
@@ -67,7 +87,8 @@ fn create_tables(conn: &Connection) -> Result<()> {
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
-            timestamp TEXT NOT NULL UNIQUE
+            timestamp TEXT NOT NULL UNIQUE,
+            cputemp TEXT NOT NULL
         )",
         [],
     )?;
@@ -80,7 +101,8 @@ fn create_tables(conn: &Connection) -> Result<()> {
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
-            timestamp TEXT NOT NULL UNIQUE
+            timestamp TEXT NOT NULL UNIQUE,
+            cputemp TEXT NOT NULL
         )",
         [],
     )?;
@@ -142,36 +164,36 @@ fn main() -> Result<()> {
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
             conn.execute(
-                "INSERT INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                "INSERT INTO sensorhour (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 15 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 30 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
         } else if minute == 45 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
             let data = read_data(date.clone(), time.clone(), timestamp.clone());
             datavec.push(data);
             conn.execute(
-                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                "INSERT INTO sensor (tempc, tempf, humi, date, time, timestamp, cputemp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp, datavec[0].cputemp],
             )?;
             
         }
