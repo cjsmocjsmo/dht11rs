@@ -67,7 +67,7 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
 
     let cputemp = read_cpu_temp();
 
-    SensorData {
+    let sensor_data = SensorData {
         tempc,
         tempf,
         humi,
@@ -75,7 +75,11 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
         time,
         timestamp,
         cputemp,
-    }
+    };
+
+    println!("\n{:?}", sensor_data);
+
+    sensor_data
 }
 
 fn create_tables(conn: &Connection) -> Result<()> {
