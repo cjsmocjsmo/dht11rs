@@ -35,7 +35,9 @@ struct SensorData {
 
 fn read_data(d: String, t: String, ts: String) -> SensorData {
     let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
-    let reading = dht.read().unwrap();
+    let reading = dht.read().expect("Failed to read from DHT sensor");
+
+
 
     let temp = reading.temperature();
     let tempc = format!("{:.1}", temp);
