@@ -33,11 +33,20 @@ struct SensorData {
     timestamp: String,
 }
 
-fn read_data(d: String, t: String, ts: String) -> SensorData {
-    let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
-    let reading = dht.read().expect("Failed to read from DHT sensor");
+// fn read_data(d: String, t: String, ts: String) -> SensorData {
+fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
+    // let mut dht = Dht::new(DhtType::Dht11, 2).unwrap();
+    // let reading = dht.read().expect("Failed to read from DHT sensor");
 
+    let mut dht = match Dht::new(DhtType::Dht11, 2) {
+        Ok(dht) => dht,
+        Err(e) => return Err(format!("Failed to create DHT sensor: {:?}", e)),
+    };
 
+    let reading = match dht.read() {
+        Ok(reading) => reading,
+        Err(e) => return Err(format!("Failed to read from DHT sensor: {:?}", e)),
+    };
 
     let temp = reading.temperature();
     let tempc = format!("{:.1}", temp);
@@ -63,7 +72,9 @@ fn read_data(d: String, t: String, ts: String) -> SensorData {
 
     println!("\n{:?}", sensor_data);
 
-    sensor_data
+    // sensor_data
+
+    Ok(sensor_data)
 }
 
 fn create_tables(conn: &Connection) -> Result<()> {
@@ -147,40 +158,92 @@ fn main() -> Result<()> {
     
         if minute == 0 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone(), timestamp.clone());
-            datavec.push(data);
-            conn.execute(
-                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+                Ok(data) => {
+                    datavec.push(data);
+                    conn.execute(
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    )?;
+                    conn.execute(
+                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
-            conn.execute(
-                "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
-            )?;
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+            // let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            // datavec.push(data);
+            // conn.execute(
+            //     "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            //     params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            // )?;
+            // conn.execute(
+            //     "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            //     params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            // )?;
         } else if minute == 15 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone(), timestamp.clone());
-            datavec.push(data);
-            conn.execute(
-                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
-            )?;
+            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+                Ok(data) => {
+                    datavec.push(data);
+                    conn.execute(
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    )?;
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+            // let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            // datavec.push(data);
+            // conn.execute(
+            //     "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            //     params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            // )?;
         } else if minute == 30 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone(), timestamp.clone());
-            datavec.push(data);
-            conn.execute(
-                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
-            )?;
+            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+                Ok(data) => {
+                    datavec.push(data);
+                    conn.execute(
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    )?;
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+            // let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            // datavec.push(data);
+            // conn.execute(
+            //     "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            //     params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            // )?;
         } else if minute == 45 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            let data = read_data(date.clone(), time.clone(), timestamp.clone());
-            datavec.push(data);
-            conn.execute(
-                "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
-            )?;
+            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+                Ok(data) => {
+                    datavec.push(data);
+                    conn.execute(
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    )?;
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+            // let data = read_data(date.clone(), time.clone(), timestamp.clone());
+            // datavec.push(data);
+            // conn.execute(
+            //     "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            //     params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+            // )?;
             
         }
     }
