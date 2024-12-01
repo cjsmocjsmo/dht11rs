@@ -135,7 +135,7 @@ fn main() -> Result<()> {
         let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
         let db_dir = Path::new("/usr/share/dht11rs/db/").to_path_buf();
 
-        let _ = rotate_db_file(year, month, day, db_path.to_str().unwrap().to_string(), db_dir.to_str().unwrap().to_string())?;
+        // let _ = rotate_db_file(year, month, day, db_path.to_str().unwrap().to_string(), db_dir.to_str().unwrap().to_string())?;
 
         let conn = Connection::open(&db_path)?;
         let _ = create_tables(&conn)?;
