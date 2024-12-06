@@ -2,6 +2,8 @@ use chrono::{Local, Timelike};
 use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
+use std::process::Command;
+use std::str;
 
 #[derive(Debug)]
 struct SensorData {
@@ -11,6 +13,21 @@ struct SensorData {
     date: String,
     time: String,
     timestamp: String,
+}
+
+fn outside_temp() -> f32 {
+    let output = Command::new("python3")
+        .arg("/media/pipi/HD/DHT11/dht11rs/outtemp.py")
+        .output()
+        .expect("Failed to execute Python script");
+
+    if output.status.success() {
+        let stdout = str::from_utf8(&output.stdout).expect("Failed to parse output");
+        stdout.trim().parse::<f32>().expect("Failed to parse temperature")
+    } else {
+        let stderr = str::from_utf8(&output.stderr).expect("Failed to parse error output");
+        panic!("Python script error: {}", stderr);
+    }
 }
 
 fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
@@ -58,6 +75,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
+            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -71,6 +89,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
+            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -83,6 +102,10 @@ fn create_tables(conn: &Connection) -> Result<()> {
 }
 
 fn main() -> Result<()> {
+    let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
+    let conn = Connection::open(&db_path)?;
+    let _ = create_tables(&conn)?;
+
     let foo = true;
     while foo {
         let now = Local::now();
@@ -92,10 +115,7 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
-
-        let conn = Connection::open(&db_path)?;
-        let _ = create_tables(&conn)?;
+        let outside_temp = outside_temp();
 
     
     
@@ -105,12 +125,12 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                     conn.execute(
-                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                    params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                    params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
                 }
                 Err(e) => {
@@ -123,8 +143,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -137,8 +157,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -151,8 +171,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
