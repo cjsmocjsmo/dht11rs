@@ -17,7 +17,7 @@ struct SensorData {
 
 fn outside_temp() -> f32 {
     let output = Command::new("python3")
-        .arg("/media/pipi/HD/DHT11/dht11rs/outtemp.py")
+        .arg("/usr/share/dht11rs/dht11rs/outtemp.py")
         .output()
         .expect("Failed to execute Python script");
 
