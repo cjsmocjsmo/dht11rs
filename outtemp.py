@@ -51,5 +51,7 @@ def main():
     else:
         print("Could not fetch the temperature.")
 
+    return temperature
+
 if __name__ == "__main__":
     main()
