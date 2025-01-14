@@ -38,12 +38,14 @@ def get_current_temperature(latitude, longitude):
 
 def main():
     parser = argparse.ArgumentParser(description='Get the current temperature for a given latitude and longitude.')
-    parser.add_argument('latitude', type=float, help='The latitude of the location.')
-    parser.add_argument('longitude', type=float, help='The longitude of the location.')
+    # parser.add_argument('latitude', type=float, help='The latitude of the location.')
+    # parser.add_argument('longitude', type=float, help='The longitude of the location.')
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
+    latit = 47.37849
+    longit = -122.94207
 
-    temperature = get_current_temperature(args.latitude, args.longitude)
+    temperature = get_current_temperature(latit, longit)
     if temperature is not None:
         print(f"The current temperature is {temperature}°F")
     else:
