@@ -25,6 +25,7 @@ fn outside_temp() -> f32 {
 
     if output.status.success() {
         let stdout = str::from_utf8(&output.stdout).expect("Failed to parse output");
+        println!("{}", stdout);
         stdout.trim().parse::<f32>().expect("Failed to parse temperature")
     } else {
         let stderr = str::from_utf8(&output.stderr).expect("Failed to parse error output");
