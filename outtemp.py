@@ -15,7 +15,7 @@ def get_current_temperature(latitude, longitude):
 
     base_url = "https://api.weather.gov/points/"
     url = f"{base_url}{latitude},{longitude}"
-    print(url)
+    # print(url)
 
     try:
         response = requests.get(url)
