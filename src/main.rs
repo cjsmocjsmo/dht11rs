@@ -47,6 +47,7 @@ fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
     };
 
     let temp = reading.temperature();
+    println!("Temperature: {:.1}°C", temp);
     let tempc = format!("{:.1}", temp);
 
     let tempff = temp * 9.0 / 5.0 + 32.0;
