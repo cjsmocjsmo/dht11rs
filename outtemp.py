@@ -46,10 +46,10 @@ def main():
     longit = -122.94207
 
     temperature = get_current_temperature(latit, longit)
-    # if temperature is not None:
-    #     print(f"The current temperature is {temperature}°F")
-    # else:
-    #     print("Could not fetch the temperature.")
+    if temperature is not None:
+        print(f"The current temperature is {temperature}°F")
+    else:
+        print("Could not fetch the temperature.")
 
     return temperature
 

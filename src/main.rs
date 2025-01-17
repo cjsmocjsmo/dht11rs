@@ -2,8 +2,8 @@ use chrono::{Local, Timelike};
 use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
-use std::process::Command;
-use std::str;
+// use std::process::Command;
+// use std::str;
 
 #[derive(Debug)]
 struct SensorData {
@@ -16,22 +16,17 @@ struct SensorData {
 }
 
 fn outside_temp() -> String {
-    let output = Command::new("python3")
-        .arg("/usr/share/dht11rs/dht11rs/outtemp.py")
-        // .arg(47.37849)
-        // .arg("-122.94207")
-        .output()
-        .expect("Failed to execute Python script");
+    let base_url = "https://api.weather.gov/points/";
+    let latitude = 47.37849;
+    let longitude = -122.94207;
+    let url = format!("{}/{},{}", base_url, latitude, longitude);
 
-    if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout).expect("Failed to parse output");
-        println!("{}", stdout);
-        // stdout.trim().parse::<f32>().expect("Failed to parse temperature")
-        stdout.trim().to_string()
-    } else {
-        let stderr = str::from_utf8(&output.stderr).expect("Failed to parse error output");
-        panic!("Python script error: {}", stderr);
-    }
+    let client = reqwest::blocking::Client::new();
+    let res = client.get(url).send().unwrap();
+    let json: serde_json::Value = res.json().unwrap();
+    let forecast_url = json["properties"]["forecast"].as_str().unwrap();
+
+    forecast_url.to_string()
 }
 
 fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
