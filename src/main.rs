@@ -116,6 +116,7 @@ fn main() -> Result<()> {
         let second = now.second();
 
         let outside_temp = outside_temp();
+        println!("Outside Temp: {}", outside_temp);
 
     
     
