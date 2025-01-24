@@ -10,7 +10,7 @@ chrono = "0.4"
 
 dht-mmap-rust = "0.1"
 
-rusqlite = "0.25"
+rusqlite = { version = "0.32.0", features = ["bundled"] }
 
 serde = { version = "1.0", features = ["derive"] }
 
