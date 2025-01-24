@@ -20,6 +20,7 @@ fn outside_temp() -> String {
     let latitude = 47.37849;
     let longitude = -122.94207;
     let url = format!("{}/{},{}", base_url, latitude, longitude);
+    println!("URL: {}", url);
 
     let client = reqwest::blocking::Client::new();
     let res = client.get(url).send().unwrap();
