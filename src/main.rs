@@ -15,19 +15,19 @@ struct SensorData {
     timestamp: String,
 }
 
-fn outside_temp() -> String {
-    let base_url = "https://api.weather.gov/points/";
-    let latitude = 47.37849;
-    let longitude = -122.94207;
-    let url = format!("{}/{},{}", base_url, latitude, longitude);
+// fn outside_temp() -> String {
+//     let base_url = "https://api.weather.gov/points/";
+//     let latitude = 47.37849;
+//     let longitude = -122.94207;
+//     let url = format!("{}/{},{}", base_url, latitude, longitude);
 
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(url).send().unwrap();
-    let json: serde_json::Value = res.json().unwrap();
-    let forecast_url = json["properties"]["forecast"].as_str().unwrap();
+//     let client = reqwest::blocking::Client::new();
+//     let res = client.get(url).send().unwrap();
+//     let json: serde_json::Value = res.json().unwrap();
+//     let forecast_url = json["properties"]["forecast"].as_str().unwrap();
 
-    forecast_url.to_string()
-}
+//     forecast_url.to_string()
+// }
 
 fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
 
@@ -75,7 +75,6 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
-            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -89,7 +88,6 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
-            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -115,8 +113,8 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        let outside_temp = outside_temp();
-        println!("Outside Temp: {}", outside_temp);
+        // let outside_temp = outside_temp();
+        // println!("Outside Temp: {}", outside_temp);
 
     
     
@@ -126,12 +124,12 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                     conn.execute(
-                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                    params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                    params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
                 }
                 Err(e) => {
@@ -144,8 +142,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -158,8 +156,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -172,8 +170,8 @@ fn main() -> Result<()> {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
