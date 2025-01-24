@@ -15,19 +15,19 @@ struct SensorData {
     timestamp: String,
 }
 
-// fn outside_temp() -> String {
-//     let base_url = "https://api.weather.gov/points/";
-//     let latitude = 47.37849;
-//     let longitude = -122.94207;
-//     let url = format!("{}/{},{}", base_url, latitude, longitude);
+fn outside_temp() -> String {
+    let base_url = "https://api.weather.gov/points/";
+    let latitude = 47.37849;
+    let longitude = -122.94207;
+    let url = format!("{}/{},{}", base_url, latitude, longitude);
 
-//     let client = reqwest::blocking::Client::new();
-//     let res = client.get(url).send().unwrap();
-//     let json: serde_json::Value = res.json().unwrap();
-//     let forecast_url = json["properties"]["forecast"].as_str().unwrap();
+    let client = reqwest::blocking::Client::new();
+    let res = client.get(url).send().unwrap();
+    let json: serde_json::Value = res.json().unwrap();
+    let forecast_url = json["properties"]["forecast"].as_str().unwrap();
 
-//     forecast_url.to_string()
-// }
+    forecast_url.to_string()
+}
 
 fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
 
@@ -113,8 +113,8 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        // let outside_temp = outside_temp();
-        // println!("Outside Temp: {}", outside_temp);
+        let outside_temp = outside_temp();
+        println!("Outside Temp: {}", outside_temp);
 
     
     
