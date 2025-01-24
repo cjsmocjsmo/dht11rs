@@ -24,6 +24,7 @@ fn outside_temp() -> String {
 
     let client = reqwest::blocking::Client::new();
     let res = client.get(url).send().unwrap();
+    println!("Response: {:?}", res);
     let json: serde_json::Value = res.json().unwrap();
     let forecast_url = json["properties"]["forecast"].as_str().unwrap();
 
