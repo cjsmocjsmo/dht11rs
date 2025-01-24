@@ -3,7 +3,7 @@ Description=Rust DHT Sensor Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/dht11rs
+ExecStart=/home/pitemp/dht11rs/target/release/dht11rs
 Environment=RUST_LOG=info
 Restart=always
 RestartSec=5
