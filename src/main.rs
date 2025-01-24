@@ -16,7 +16,7 @@ struct SensorData {
 }
 
 fn outside_temp() -> String {
-    let base_url = "https://api.weather.gov/points/";
+    let base_url = "https://api.weather.gov/points";
     let latitude = 47.37849;
     let longitude = -122.94207;
     let url = format!("{}/{},{}", base_url, latitude, longitude);
