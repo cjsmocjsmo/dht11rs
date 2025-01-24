@@ -100,7 +100,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db_path = Path::new("/usr/share/dht11rs/dht11rs/sensor_data.db");
+    let db_path = Path::new("/usr/share/dht11rs/sensor_data.db");
     let conn = Connection::open(&db_path)?;
     let _ = create_tables(&conn)?;
 
