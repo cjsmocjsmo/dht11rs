@@ -12,6 +12,7 @@ use serde::Deserialize;
 struct SensorData {
     tempc: String,
     tempf: String,
+    tempo: String,
     humi: String,
     date: String,
     time: String,
@@ -28,7 +29,8 @@ struct CurrentWeather {
     temperature: f64,
 }
 
-fn current_temp() -> Result<f64, Box<dyn std::error::Error>> {
+// fn current_temp() -> Result<f64, Box<dyn std::error::Error>> {
+fn current_temp() -> Result<String, Box<dyn std::error::Error>> {
     let latitude = 47.37349;
     let longitude = -122.94207;
     
@@ -45,7 +47,10 @@ fn current_temp() -> Result<f64, Box<dyn std::error::Error>> {
     }
 
     let weather: OpenMeteoResponse = response.json()?;
-    Ok(weather.current_weather.temperature)
+    let outsidetemp = weather.current_weather.temperature;
+
+    Ok(outsidetemp.to_string())
+    // Ok(weather.current_weather.temperature)
 }
 
 // fn outside_temp() -> String {
@@ -64,7 +69,7 @@ fn current_temp() -> Result<f64, Box<dyn std::error::Error>> {
 //     forecast_url.to_string()
 // }
 
-fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
+fn read_data(d: String, t: String, ts: String, ot: String) -> Result<SensorData, String> {
 
     let mut dht = match Dht::new(DhtType::Dht11, 2) {
         Ok(dht) => dht,
@@ -89,10 +94,12 @@ fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
     let date = d;
     let time = t;
     let timestamp = ts;
+    let tempo = ot;
 
     let sensor_data = SensorData {
         tempc,
         tempf,
+        tempo, 
         humi,
         date,
         time,
@@ -110,6 +117,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
+            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -123,6 +131,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             id INTEGER PRIMARY KEY,
             tempc TEXT NOT NULL,
             tempf TEXT NOT NULL,
+            tempo TEXT NOT NULL,
             humi TEXT NOT NULL,
             date TEXT NOT NULL,
             time TEXT NOT NULL,
@@ -148,7 +157,13 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        let outside_temp = current_temp();
+        let outside_temp = match current_temp() {
+            Ok(temp) => temp,
+            Err(e) => {
+                eprintln!("Failed to get outside temperature: {}", e);
+                continue;
+            }
+        };
         println!("Outside Temp: {:?}", outside_temp);
         println!("Timestamp: {}", timestamp);
 
@@ -156,12 +171,12 @@ fn main() -> Result<()> {
     
         if minute == 0 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+            match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                     conn.execute(
                     "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
@@ -174,12 +189,12 @@ fn main() -> Result<()> {
             }
         } else if minute == 15 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+            match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -188,12 +203,12 @@ fn main() -> Result<()> {
             }
         } else if minute == 30 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+            match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
@@ -202,12 +217,12 @@ fn main() -> Result<()> {
             }
         } else if minute == 45 && second == 0 {
             let mut datavec:Vec<SensorData> = vec![];
-            match read_data(date.clone(), time.clone(), timestamp.clone()) {
+            match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
                     datavec.push(data);
                     conn.execute(
-                        "INSERT OR IGNORE INTO sensor (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                        params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                        "INSERT OR IGNORE INTO sensor (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                        params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                 }
                 Err(e) => {
