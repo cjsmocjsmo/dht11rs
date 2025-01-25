@@ -2,6 +2,9 @@ use chrono::{Local, Timelike};
 use dht_mmap_rust::{Dht, DhtType};
 use rusqlite::{params, Connection, Result};
 use std::path::Path;
+use reqwest;
+use serde::Deserialize;
+
 // use std::process::Command;
 // use std::str;
 
@@ -15,21 +18,51 @@ struct SensorData {
     timestamp: String,
 }
 
-fn outside_temp() -> String {
-    let base_url = "https://api.weather.gov/points";
-    let latitude = 47.37849;
-    let longitude = -122.94207;
-    let url = format!("{}/{},{}", base_url, latitude, longitude);
-    println!("URL: {}", url);
-
-    let client = reqwest::blocking::Client::new();
-    let res = client.get(url).send().unwrap();
-    println!("Response: {:?}", res);
-    let json: serde_json::Value = res.json().unwrap();
-    let forecast_url = json["properties"]["forecast"].as_str().unwrap();
-
-    forecast_url.to_string()
+#[derive(Deserialize, Debug)]
+struct OpenMeteoResponse {
+    current_weather: CurrentWeather,
 }
+
+#[derive(Deserialize, Debug)]
+struct CurrentWeather {
+    temperature: f64,
+}
+
+fn current_temp() -> Result<f64, Box<dyn std::error::Error>> {
+    let latitude = 47.37349;
+    let longitude = -122.94207;
+    
+    // Construct Open-Meteo API URL
+    let url = format!(
+        "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current_weather=true",
+        latitude, longitude
+    );
+
+    let response = reqwest::blocking::get(&url)?;
+
+    if !response.status().is_success() {
+        return Err("Request failed".into());
+    }
+
+    let weather: OpenMeteoResponse = response.json()?;
+    Ok(weather.current_weather.temperature)
+}
+
+// fn outside_temp() -> String {
+//     let base_url = "https://api.weather.gov/points";
+//     let latitude = 47.37849;
+//     let longitude = -122.94207;
+//     let url = format!("{}/{},{}", base_url, latitude, longitude);
+//     println!("URL: {}", url);
+
+//     let client = reqwest::blocking::Client::new();
+//     let res = client.get(url).send().unwrap();
+//     println!("Response: {:?}", res);
+//     let json: serde_json::Value = res.json().unwrap();
+//     let forecast_url = json["properties"]["forecast"].as_str().unwrap();
+
+//     forecast_url.to_string()
+// }
 
 fn read_data(d: String, t: String, ts: String) -> Result<SensorData, String> {
 
@@ -115,8 +148,8 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        let outside_temp = outside_temp();
-        println!("Outside Temp: {}", outside_temp);
+        let outside_temp = current_temp();
+        println!("Outside Temp: {:?}", outside_temp);
 
     
     
