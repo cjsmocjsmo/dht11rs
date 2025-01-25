@@ -164,8 +164,8 @@ fn main() -> Result<()> {
                 continue;
             }
         };
-        // println!("Outside Temp: {:?}", outside_temp);
-        // println!("Timestamp: {}", timestamp);
+        println!("Outside Temp: {:?}", outside_temp);
+        println!("Timestamp: {}", timestamp);
 
     
     
