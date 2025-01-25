@@ -158,19 +158,26 @@ fn main() -> Result<()> {
         let minute = now.minute();
         let second = now.second();
 
-        let outside_temp = match current_temp() {
-            Ok(temp) => temp,
-            Err(e) => {
-                eprintln!("Failed to get outside temperature: {}", e);
-                continue;
-            }
-        };
+        // let outside_temp = match current_temp() {
+        //     Ok(temp) => temp,
+        //     Err(e) => {
+        //         eprintln!("Failed to get outside temperature: {}", e);
+        //         continue;
+        //     }
+        // };
         // println!("Outside Temp: {:?}", outside_temp);
         // println!("Timestamp: {}", timestamp);
 
     
     
         if minute == 0 && second == 0 {
+            let outside_temp = match current_temp() {
+                Ok(temp) => temp,
+                Err(e) => {
+                    eprintln!("Failed to get outside temperature: {}", e);
+                    continue;
+                }
+            };
             let mut datavec:Vec<SensorData> = vec![];
             match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
@@ -189,6 +196,13 @@ fn main() -> Result<()> {
                 }
             }
         } else if minute == 15 && second == 0 {
+            let outside_temp = match current_temp() {
+                Ok(temp) => temp,
+                Err(e) => {
+                    eprintln!("Failed to get outside temperature: {}", e);
+                    continue;
+                }
+            };
             let mut datavec:Vec<SensorData> = vec![];
             match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
@@ -203,6 +217,13 @@ fn main() -> Result<()> {
                 }
             }
         } else if minute == 30 && second == 0 {
+            let outside_temp = match current_temp() {
+                Ok(temp) => temp,
+                Err(e) => {
+                    eprintln!("Failed to get outside temperature: {}", e);
+                    continue;
+                }
+            };
             let mut datavec:Vec<SensorData> = vec![];
             match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
@@ -217,6 +238,13 @@ fn main() -> Result<()> {
                 }
             }
         } else if minute == 45 && second == 0 {
+            let outside_temp = match current_temp() {
+                Ok(temp) => temp,
+                Err(e) => {
+                    eprintln!("Failed to get outside temperature: {}", e);
+                    continue;
+                }
+            };
             let mut datavec:Vec<SensorData> = vec![];
             match read_data(date.clone(), time.clone(), timestamp.clone(), outside_temp.clone()) {
                 Ok(data) => {
