@@ -150,6 +150,7 @@ fn main() -> Result<()> {
 
         let outside_temp = current_temp();
         println!("Outside Temp: {:?}", outside_temp);
+        println!("Timestamp: {}", timestamp);
 
     
     
