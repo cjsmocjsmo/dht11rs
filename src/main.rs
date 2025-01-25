@@ -48,8 +48,9 @@ fn current_temp() -> Result<String, Box<dyn std::error::Error>> {
 
     let weather: OpenMeteoResponse = response.json()?;
     let outsidetemp = weather.current_weather.temperature;
-
-    Ok(outsidetemp.to_string())
+    let outtemp = outsidetemp * 9.0 / 5.0 + 32.0;
+    let outtempf = format!("{:.1}", outtemp);
+    Ok(outtempf)
     // Ok(weather.current_weather.temperature)
 }
 
