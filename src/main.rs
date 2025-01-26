@@ -187,8 +187,8 @@ fn main() -> Result<()> {
                         params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
                     )?;
                     conn.execute(
-                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-                    params![datavec[0].tempc, datavec[0].tempf, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
+                    "INSERT OR IGNORE INTO sensorhour (tempc, tempf, tempo, humi, date, time, timestamp) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                    params![datavec[0].tempc, datavec[0].tempf, outside_temp, datavec[0].humi, datavec[0].date, datavec[0].time, datavec[0].timestamp],
             )?;
                 }
                 Err(e) => {
