@@ -157,18 +157,6 @@ fn main() -> Result<()> {
         let timestamp = now.format("%Y-%m-%d-%H:%M:%S").to_string();
         let minute = now.minute();
         let second = now.second();
-
-        // let outside_temp = match current_temp() {
-        //     Ok(temp) => temp,
-        //     Err(e) => {
-        //         eprintln!("Failed to get outside temperature: {}", e);
-        //         continue;
-        //     }
-        // };
-        // println!("Outside Temp: {:?}", outside_temp);
-        // println!("Timestamp: {}", timestamp);
-
-    
     
         if minute == 0 && second == 0 {
             let outside_temp = match current_temp() {
